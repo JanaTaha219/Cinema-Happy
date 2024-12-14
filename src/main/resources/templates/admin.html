@@ -1,0 +1,1277 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Admin Dashboard</a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="btn-group mr-auto">
+            <button type="button" class="btn btn-light" onclick="showUpdateForm()">Update Admin Account</button>
+            <button type="button" class="btn btn-light" onclick="showDeleteConfirmation()">Delete Admin Account</button>
+            <button type="button" class="btn btn-light" onclick="logout()">Log out</button>
+
+        </div>
+    </div>
+</div>
+<div class="container mt-4">
+    <div id="updateForm" style="display: none;">
+        <form id="updateViewerForm" onsubmit="submitUpdateForm(event)">
+            <div class="form-group">
+                <label for="username">User name:</label>
+                <input type="text" class="form-control" id="username" name="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" id="password" name="password">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" name="email">
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+    <div id="deleteConfirmation" style="display: none;">
+        <form id="deleteConfirmationForm">
+            <p>Are you sure you want to delete your account?</p>
+            <button type="button" class="btn btn-danger" onclick="confirmDelete()">Yes</button>
+            <button type="button" class="btn btn-secondary" onclick="cancelDelete()">No</button>
+        </form>
+    </div>
+
+
+    <h2>Hello Admin <span th:text="${username}"></span></h2>
+
+    <div class="container">
+        <div class="row mt-4">
+            <div class="col">
+                <h3>Schedule Processing</h3>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="toggleAddScheduleForm()">Add Schedule</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="toggleUpdateScheduleForm()">Update Schedule</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-danger mr-2" onclick="toggleDeleteScheduleForm()">Delete Schedule</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-success mr-2" onclick="toggleScheduleVisibility()">Retrieve All Schedules</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="toggleGetScheduleForm()">Get Schedule by ID</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="col">
+                <h3>Film Processing</h3>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="toggleAddFilmForm()">Add Film</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="toggleUpdateFilmForm()">Update Film</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-danger" onclick="toggleDeleteFilmForm()">Delete Film</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-success" onclick="toggleFilmVisibility()">Retrieve All Films</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-info mr-2" onclick="retrieveFilmsByNameForm()">Retrieve Films by Name</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="col">
+                <h3>User Processing</h3>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="showGetUserForm()">Get User By Id</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="getAllUsers('viewer')">Get All Viewers</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="getAllUsers('producer')">Get All Producers</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="getAllUsers('admin')">Get All Admins</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="showUpdateViewerRoleForm()">Update Viewer Role</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="toggleUpdateUserForm('viewer')">Update Viewer Information</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-primary mr-2" onclick="toggleUpdateUserForm('producer')">Update Producer Information</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-danger" onclick="toggleDeleteUserForm()">Delete User</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="scheduleForm" style="display: none;">
+        <form id="scheduleFormm" onsubmit="submitForm(event)">
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <input type="number" class="form-control" id="price" name="price" required>
+            </div>
+            <div class="form-group">
+                <label for="filmId">Film ID:</label>
+                <input type="number" class="form-control" id="filmId" name="filmId" required>
+            </div>
+            <div class="form-group">
+                <label for="availableSeats">Available Seats:</label>
+                <input type="number" class="form-control" id="availableSeats" name="availableSeats" required>
+            </div>
+            <div class="form-group">
+                <label for="showDateTime">Show Date and Time:</label>
+                <input type="datetime-local" class="form-control" id="showDateTime" name="showDateTime" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+    <div id="UpdatescheduleForm" style="display: none;">
+        <form id="UpdatescheduleFormm" onsubmit="updateSchedule(event)">
+            <div class="form-group">
+                <label for="scheduleIdd">Schedule ID:</label>
+                <input type="number" class="form-control" id="scheduleIdd" name="scheduleIdd" required>
+            </div>
+            <div class="form-group">
+                <label for="pricee">Price:</label>
+                <input type="number" class="form-control" id="pricee" name="pricee" >
+            </div>
+            <div class="form-group">
+                <label for="filmIdd">Film ID:</label>
+                <input type="number" class="form-control" id="filmIdd" name="filmIdd" >
+            </div>
+            <div class="form-group">
+                <label for="availableSeatss">Available Seats:</label>
+                <input type="number" class="form-control" id="availableSeatss" name="availableSeatss" >
+            </div>
+            <div class="form-group">
+                <label for="showDateTimee">Show Date and Time:</label>
+                <input type="datetime-local" class="form-control" id="showDateTimee" name="showDateTimee" >
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+
+    <div id="deleteScheduleForm" style="display: none;"class="form-group">
+        <form id="deleteForm" onsubmit="deleteSchedule(event)"><br>
+
+            <label for="scheduleId">Schedule ID:</label>
+            <input type="text" class="form-control" id="scheduleId" placeholder="Enter Schedule ID" required><br>
+
+            <button type="submit"class="btn btn-primary">Delete</button>
+        </form>
+    </div>
+    <div id="retrieveByNameForm" style="display: none;">
+        <form id="retrieveFilmForm" onsubmit="retrieveFilmsByName(event)">
+            <div class="form-group">
+                <label for="filmNamee">Enter Film Name:</label>
+                <input type="text" class="form-control" id="filmNamee" name="filmNamee">
+            </div>
+            <button type="submit" class="btn btn-primary">Retrieve</button>
+        </form>
+    </div>
+    <div id="updateViewerRoleForm" style="display: none;">
+    <form id="updateViewerRoleFormm" onsubmit="updateViewerRole(event)">
+        <div class="form-group">
+            <label for="viewerId">Viewer ID</label>
+            <input type="text" class="form-control" id="viewerId" placeholder="Enter Viewer ID" required>
+        </div>
+        <div class="form-group">
+            <label>Role:</label><br>
+            <div class="form-check form-check-inline">
+
+                <input class="form-check-input" type="radio" name="role" id="adminRole" value="ROLE_ADMIN" checked>
+                <label class="form-check-label" for="adminRole">Admin</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="role" id="producerRole" value="ROLE_PRODUCER">
+                <label class="form-check-label" for="producerRole">Producer</label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Role</button>
+    </form>
+</div>
+
+    <div id="getScheduleForm" style="display: none;">
+        <form id="getScheduleFormm" onsubmit="getScheduleById(event)">
+            <div class="form-group">
+                <label for="schedule">Schedule ID:</label>
+                <input type="number" class="form-control" id="schedule" name="schedule" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+<!--   update user form -->
+    <div id="UpdateUserForm" style="display: none;">
+        <form id="UpdateUserFormm" onsubmit="updateUser(event)">
+            <div class="form-group">
+                <label for="usernamee">User Id:</label>
+                <input type="number" class="form-control" id="userid" name="userid" required>
+            </div>
+            <div class="form-group">
+                <label for="usernamee">User name:</label>
+                <input type="text" class="form-control" id="usernamee" name="usernamee" required>
+            </div>
+            <div class="form-group">
+                <label for="passwordd">Password:</label>
+                <input type="text" class="form-control" id="passwordd" name="pricee" min="8">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="emaill" name="emaill" >
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+    <div id="addFilmForm" style="display: none;">
+        <form id="filmFormAdd" onsubmit="addFilm(event)">
+            <div class="form-group">
+                <label for="producerId">Producer ID:</label>
+                <input type="text" class="form-control" id="producerId" name="producerId" required>
+            </div>
+            <div class="form-group">
+                <label for="filmName">Film Name:</label>
+                <input type="text" class="form-control" id="filmName" name="name" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+    <div id="deleteFilmForm" style="display: none;">
+        <form id="filmFormDelete" onsubmit="return deleteFilm()">
+            <div class="form-group">
+                <label for="deleteFilmId">Enter Film ID to Delete:</label>
+                <input type="text" class="form-control" id="deleteFilmId" name="deleteFilmId">
+            </div>
+            <button type="submit" class="btn btn-danger">Confirm Delete</button>
+        </form>
+
+    </div>
+
+    <div id="updateFilmForm" style="display: none;">
+        <form id="filmFormUpdate" action="#" method="patch" onsubmit="return updateFilm()">
+            <div class="form-group">
+                <label for="film">Film ID:</label>
+                <input type="text" class="form-control" id="film" name="film">
+            </div>
+            <div class="form-group">
+                <label for="newFilmName">New Film Name:</label>
+                <input type="text" class="form-control" id="newFilmName" name="newFilmName">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+    <div id="ratingFormm" style="display: none;">
+        <form id="ratingForm" onsubmit="return submitRating()">
+
+            <div class="form-group">
+                <label for="viewerIdd">Viewer ID:</label>
+                <input type="number" class="form-control" id="viewerIdd" placeholder="Enter Viewer ID" required>
+            </div>
+
+            <div class="form-group">
+                <label for="idInput">ID:</label>
+                <input type="number" class="form-control" id="idInput" placeholder="Enter ID" required>
+            </div>
+            <div class="form-group">
+                <label for="ratingInput">Rating (0-5):</label>
+                <input type="number" class="form-control" id="ratingInput" min="0" max="5" placeholder="Enter Rating" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+    <div id="reservationForm" style="display: none;">
+        <form id="reserveSeatForm" onsubmit="reserveSeat(event)">
+            <div class="form-group">
+                <label for="ViewerInput">Viewer ID:</label>
+                <input type="number" class="form-control" id="ViewerInput" placeholder="Enter ID" required>
+            </div>
+            <div class="form-group">
+                <label for="scheduleIdInput">Schedule ID:</label>
+                <input type="text" class="form-control" id="scheduleIdInput" placeholder="Enter Schedule ID" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Reserve</button>
+        </form>
+    </div>
+
+    <div id="getUserByIdForm" style="display: none;">
+    <form onsubmit="return getUserById()">
+        <div class="form-group">
+            <label for="user">Enter User ID:</label>
+            <input type="number" class="form-control" id="user" required>
+        </div>
+        <div class="form-group">
+            <input type="radio" id="viewersById" name="userType" value="viewer" checked>
+            <label for="viewersById">Viewer</label>
+            <input type="radio" id="producersById" name="userType" value="producer">
+            <label for="producersById">Producer</label>
+            <input type="radio" id="adminsById" name="userType" value="admin">
+            <label for="adminsById">Admin</label>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Get User</button>
+        </div>
+    </form>
+    </div>
+
+    <div id="deleteUserForm" style="display: none;">
+        <h5 class="mt-3">Enter User ID to Delete:</h5>
+        <form onsubmit="return deleteUser()">
+            <div class="form-group">
+                <label for="userIdToDelete">User ID:</label>
+                <input type="number" class="form-control" id="userIdToDelete" required>
+            </div>
+            <div class="form-group">
+                <input type="radio" id="deleteViewer" name="userTypeToDelete" value="viewer" checked>
+                <label for="deleteViewer">Delete Viewer</label>
+                <input type="radio" id="deleteProducer" name="userTypeToDelete" value="producer">
+                <label for="deleteProducer">Delete Producer</label>
+            </div>
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    </div>
+
+
+
+    <div id="scheduleDetails" style="display: none;">
+        <h2>Schedule Details</h2>
+        <div id="scheduleDataa" class="row"></div>
+    </div>
+
+    <div id="filmList" style="display: none;">
+        <h2>All Films</h2>
+        <div id="filmData"></div>
+    </div>
+    <div id="scheduleList" style="display: none;">
+        <h2>All Schedules</h2>
+        <div id="scheduleData" class="row"></div>
+    </div>
+
+    <div class="row mt-5" id="userData" style="display: none;">
+            <div id="userDataa"></div>
+    </div>
+
+</div>
+
+
+<script th:inline="javascript">
+    function showUpdateForm(){
+        var form = document.getElementById("updateForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    function showGetUserForm(){
+        var div1 = document.getElementById("userData");
+        var div = document.getElementById("getUserByIdForm");
+        if (div.style.display === "none") {
+            div.style.display = "block";
+            div1.style.display = "block";
+        } else {
+            div.style.display = "none";
+            div1.style.display = "none";
+        }
+    }
+
+    function showDeleteConfirmation() {
+        var form = document.getElementById("deleteConfirmation");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    function toggleAddFilmForm() {
+        var form = document.getElementById("addFilmForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    function toggleUpdateFilmForm() {
+        var form = document.getElementById("updateFilmForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    function toggleUpdateUserForm(type) {
+        var div = document.getElementById("UpdateUserForm");
+        var form = document.getElementById("UpdateUserFormm");
+        if (div.style.display === "none") {
+            if (type === "viewer") {
+                form.onsubmit = updateViewerInfo;
+            } else if (type === "producer") {
+                form.onsubmit = updateProducerInfo;
+            }
+            div.style.display = "block";
+        } else {
+            div.style.display = "none";
+        }
+    }
+    function toggleForm(type) {
+        var form = document.getElementById("ratingFormm");
+        var idInput = document.getElementById("idInput");
+        var ratingInput = document.getElementById("ratingInput");
+        console.log("rating a ", type);
+        if (form.style.display === "none" || form.dataset.type !== type) {
+            form.style.display = "block";
+            form.dataset.type = type;
+            idInput.value = "";
+            ratingInput.value = "";
+        } else {
+            form.style.display = "none";
+            form.dataset.type = "";
+        }
+    }
+
+    function toggleReservationForm() {
+        var reservationForm = document.getElementById("reservationForm");
+        if (reservationForm.style.display === "none") {
+            reservationForm.style.display = "block";
+        } else {
+            reservationForm.style.display = "none";
+        }
+    }
+
+    function showUpdateViewerRoleForm() {
+        var form = document.getElementById("updateViewerRoleForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+    function toggleGetScheduleForm() {
+        var getScheduleForm = document.getElementById('getScheduleForm');
+        var scheduleDetails = document.getElementById('scheduleDetails');
+
+        if (getScheduleForm.style.display === 'none') {
+            getScheduleForm.style.display = 'block';
+            // Hide schedule details if they are visible
+            scheduleDetails.style.display = 'none';
+        } else {
+            getScheduleForm.style.display = 'none';
+            // Hide schedule details if they are visible
+            scheduleDetails.style.display = 'none';
+        }
+    }
+    function toggleDeleteFilmForm() {
+        var form = document.getElementById("deleteFilmForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    function cancelDelete() {
+        document.getElementById("deleteConfirmation").style.display = "none";
+    }
+
+    function toggleDeleteUserForm() {
+        var form = document.getElementById("deleteUserForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    function deleteUser() {
+        event.preventDefault();
+        var userId = document.getElementById("userIdToDelete").value;
+        var userType = document.querySelector('input[name="userTypeToDelete"]:checked').value;
+        var token = /*[[${token}]]*/ '';
+        var xhr = new XMLHttpRequest();
+
+        var url = "/api/v1/" + userType + "?id=" + userId;
+        xhr.open("DELETE", url);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    alert("User deleted successfully.");
+                } else {
+                    alert("Failed to delete user.");
+                }
+            }
+        };
+
+        xhr.send();
+    }
+
+    function addFilm() {
+        event.preventDefault();
+
+        var producerId = document.getElementById("producerId").value;
+        var filmName = document.getElementById("filmName").value;
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/v1/producer/film");
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 201) {
+                    alert("Film added successfully!");
+                    console.log("Film added successfully");
+                } else {
+                    console.error("Failed to add film");
+                }
+            }
+        };
+
+        var requestBody = {
+            "producerId": producerId,
+            "name": filmName
+        };
+
+        xhr.send(JSON.stringify(requestBody));
+        return false;
+    }
+
+    function deleteFilm() {
+        toggleDeleteFilmForm();
+        var filmId = document.getElementById("deleteFilmId").value;
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("DELETE", "/api/v1/producer/film/" + filmId, true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("Film deleted successfully!");
+                    console.log("Film deleted successfully");
+                } else {
+                    console.error("Failed to delete film");
+                }
+            }
+        };
+
+        xhr.send();
+        console.log("Delete Film button clicked.");
+        return false;
+    }
+    function updateFilm() {
+        toggleUpdateFilmForm();
+        var filmId = document.getElementById("film").value;
+        var newFilmName = document.getElementById("newFilmName").value;
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("PATCH", "/api/v1/producer/film/" + filmId, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("Film updated successfully!");
+                    console.log("Film updated successfully");
+                } else {
+                    console.error("Failed to update film");
+                }
+            }
+        };
+
+        var requestBody = {
+            "name": newFilmName
+        };
+
+        xhr.send(JSON.stringify(requestBody));
+        console.log("Update Film button clicked.");
+        return false;
+    }
+
+    function getScheduleById (event){
+        event.preventDefault();
+        var id = document.getElementById("schedule").value;
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/api/v1/schedules/" + id, true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var schedule = JSON.parse(xhr.responseText);
+                    displaySchedule(schedule);
+                    console.log("retrieved schedule");
+                } else {
+                    document.getElementById('scheduleDataa').innerHTML = "Not found";
+                    console.error("Failed to retrieve schedule");
+                }
+            }
+        };
+        xhr.send();
+        return false;
+    }
+    function displaySchedule(schedule) {
+        const scheduleDetailsDiv = document.getElementById('scheduleDetails');
+        scheduleDetailsDiv.style.display = 'block';
+
+        // Construct HTML for schedule details with Bootstrap classes
+        const scheduleDetailsHTML = `
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Schedule Details</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>ID:</strong> ${schedule.id}</li>
+                    <li class="list-group-item"><strong>Price:</strong> ${schedule.price}</li>
+                    <li class="list-group-item"><strong>Available Seats:</strong> ${schedule.availableSeats}</li>
+                    <li class="list-group-item"><strong>Show Date and Time:</strong> ${schedule.showDateTime}</li>
+                </ul>
+            </div>
+        </div>
+    `;
+
+        // Update schedule data in the DOM
+        document.getElementById('scheduleDataa').innerHTML = scheduleDetailsHTML;
+    }
+
+    function updateViewerRole(event) {
+        event.preventDefault();
+        var viewerId = document.getElementById("viewerId").value;
+        var role = document.querySelector('input[name="role"]:checked').value;
+        var token = /*[[${token}]]*/ '';
+        var requestBody = {
+            role: role
+        };
+
+        console.log(requestBody);
+        var xhr = new XMLHttpRequest();
+        xhr.open("PATCH", "http://localhost:8080/api/v1/viewer?id=" + viewerId);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("Viewer's role updated successfully");
+                    console.log("Viewer's role updated successfully");
+                } else {
+                    console.error("Error updating viewer's role");
+                }
+            }
+        };
+        xhr.send(JSON.stringify(requestBody));
+    }
+
+    function updateSchedule(event){
+        event.preventDefault();
+        var scheduleId = document.getElementById("scheduleIdd").value;
+        var filmId = document.getElementById("filmIdd").value;
+        var price = document.getElementById("pricee").value;
+        var showTime =document.getElementById("showDateTimee").value;;
+        var availableSeats = document.getElementById("availableSeatss").value;
+        var token = /*[[${token}]]*/ '';
+
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("PATCH", "/api/v1/admin/schedule/" + scheduleId, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("Film updated successfully!");
+                    console.log("Film updated successfully");
+                } else {
+                    console.error("Failed to update film");
+                }
+            }
+        };
+
+        var requestBody = {};
+
+        if (filmId) {
+            requestBody.filmId = filmId;
+        }
+        if (price) {
+            requestBody.price = price;
+        }
+        if (showTime) {
+            requestBody.showTime = showTime;
+        }
+
+        if (availableSeats) {
+            requestBody.availableSeats = availableSeats;
+        }
+
+        xhr.send(JSON.stringify(requestBody));
+        return false;
+    }
+
+    function updateViewerInfo(){
+        console.log("updateViewerInfo");
+        return updateUser("http://localhost:8080/api/v1/viewer?id=");
+    }
+    function updateProducerInfo(){
+        console.log("updateProducerInfo");
+        return updateUser("http://localhost:8080/api/v1/producer/");
+    }
+
+    function updateUser(url){
+        event.preventDefault();
+        var username = document.getElementById("usernamee").value;
+        var password = document.getElementById("passwordd").value;
+        var email = document.getElementById("emaill").value;
+        var id = document.getElementById("userid").value;
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        console.log("id", id);
+        console.log("url", url);
+        xhr.open("PATCH", url + id);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("user updated successfully!");
+                    console.log("user updated successfully");
+                } else {
+                    console.error("Failed to update user");
+                }
+            }
+        };
+
+        var requestBody = {};
+
+        if (username) {
+            requestBody.username = username;
+        }
+        if (password) {
+            requestBody.password = password;
+        }
+        if (email) {
+            requestBody.email = email;
+        }
+
+        xhr.send(JSON.stringify(requestBody));
+        return false;
+    }
+
+    function logout() {
+        var id = /*[[${id}]]*/ '';
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/out", true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("logged out successfully");
+                    console.log("logged out successfully");
+                    window.location.href = "authenticate.html"; // Redirect to authenticate.html
+                } else {
+                    // Request failed
+                    console.error("Failed to logout");
+                }
+            }
+        };
+        xhr.send();
+        window.location.href = "login";
+        return false;
+    }
+    function confirmDelete() {
+        var id = /*[[${id}]]*/ '';
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("DELETE", "/api/v1/admin?id=" + encodeURIComponent(id), true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("Viewer account deleted successfully");
+                    console.log("Viewer account deleted successfully");
+                    window.location.href = "authenticate.html"; // Redirect to authenticate.html
+                } else {
+                    // Request failed
+                    console.error("Failed to delete viewer account");
+                }
+            }
+        };
+        xhr.send();
+        window.location.href = "authenticatee";
+        return false;
+    }
+
+    function submitUpdateForm(event) {
+        event.preventDefault();
+
+        var id = /*[[${id}]]*/ '';
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var email = document.getElementById("email").value;
+        var token = /*[[${token}]]*/ '';
+
+        var requestBody = {};
+
+        if (username) {
+            requestBody.username = username;
+        }
+        if (password) {
+            requestBody.password = password;
+        }
+        if (email) {
+            requestBody.email = email;
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("PATCH", "/api/v1/admin?id=" + encodeURIComponent(id), true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("Producer account updated successfully!");
+                    console.log("Producer account updated successfully");
+                } else {
+                    console.error("Failed to update producer account");
+                }
+            }
+        };
+        xhr.send(JSON.stringify(requestBody));
+        return false;
+    }
+
+    function toggleAddScheduleForm() {
+        var form = document.getElementById("scheduleForm");
+        form.style.display === "none" ? form.style.display = "block" : form.style.display = "none";
+    }
+
+    function submitForm(event) {
+        event.preventDefault();
+        var formData = new FormData(document.getElementById("scheduleFormm"));
+        var xhr = new XMLHttpRequest();
+        var token = /*[[${token}]]*/ '';
+        xhr.open("POST", "/api/v1/admin/schedule", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+        console.log({
+            price: formData.get("price"),
+            filmId: formData.get("filmId"),
+            availableSeats: formData.get("availableSeats"),
+            showDateTime: formData.get("showDateTime")
+        })
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 201) {
+                    alert("Schedule added successfully!");
+                } else {
+                    alert("Failed to add schedule. Please try again.");
+                }
+            }
+        };
+        xhr.send(JSON.stringify({
+            price: formData.get("price"),
+            filmId: formData.get("filmId"),
+            availableSeats: formData.get("availableSeats"),
+            showDateTime: formData.get("showDateTime")
+        }));
+    }
+    function toggleDeleteScheduleForm() {
+        var form = document.getElementById("deleteScheduleForm");
+        form.style.display === "none" ? form.style.display = "block" : form.style.display = "none";
+    }
+    function toggleUpdateScheduleForm(){
+        var form = document.getElementById("UpdatescheduleForm");
+        form.style.display === "none" ? form.style.display = "block" : form.style.display = "none";
+    }
+    function deleteSchedule(event) {
+        event.preventDefault();
+        var token = /*[[${token}]]*/ '';
+        var scheduleId = document.getElementById("scheduleId").value;
+        var xhr = new XMLHttpRequest();
+        xhr.open("DELETE", "http://localhost:8080/api/v1/admin/schedule/" + scheduleId);
+        xhr.setRequestHeader("Authorization", "Bearer " + token); // Replace modelAttributeToken with your actual token
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("Schedule deleted successfully");
+                    console.log("Schedule deleted successfully");
+                } else {
+                    // Handle error response
+                    console.error("Error deleting schedule");
+                }
+            }
+        };
+        xhr.send();
+        return false;
+    }
+    function toggleFilmVisibility() {
+        var filmList = document.getElementById("filmList");
+        if (filmList.style.display === "none") {
+            retrieveAllFilms();
+        } else {
+            hideFilms();
+        }
+    }
+
+
+    function retrieveAllFilms() {
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/api/v1/film", true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var films = JSON.parse(xhr.responseText).data.Films;
+                    displayFilms(films);
+                } else {
+                    document.getElementById("filmList").style.display = "none";
+                    console.error("Failed to retrieve films");
+                }
+            }
+        };
+
+        xhr.send();
+        return false;
+    }
+
+
+    function displayFilms(films) {
+        var filmData = document.getElementById("filmData");
+        filmData.innerHTML = "";
+
+        films.forEach(function(film) {
+            var filmDiv = document.createElement("div");
+            filmDiv.classList.add("col-md-4");
+
+            var card = document.createElement("div");
+            card.classList.add("card", "mb-4", "shadow-sm");
+
+            var cardBody = document.createElement("div");
+            cardBody.classList.add("card-body");
+
+            var name = document.createElement("h5");
+            name.classList.add("card-title");
+            name.textContent = film.name;
+
+            var producerId = document.createElement("p");
+            producerId.classList.add("card-text");
+            producerId.textContent = "Producer ID: " + film.producerId;
+
+            var totalRating = document.createElement("p");
+            totalRating.classList.add("card-text");
+            totalRating.textContent = "Total Rating: " + film.totalRating;
+
+            cardBody.appendChild(name);
+            cardBody.appendChild(producerId);
+            cardBody.appendChild(totalRating);
+
+            card.appendChild(cardBody);
+            filmDiv.appendChild(card);
+            filmData.appendChild(filmDiv);
+        });
+
+        document.getElementById("filmList").style.display = "block";
+    }
+    function hideFilms() {
+        document.getElementById("filmList").style.display = "none";
+    }
+    function retrieveFilmsByNameForm() {
+        var form = document.getElementById("retrieveByNameForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+        if(form.style.display === "none")
+            document.getElementById("filmList").style.display = "none";
+    }
+
+    function retrieveFilmsByName(event) {
+        event.preventDefault();
+
+        var filmName = document.getElementById("filmNamee").value;
+        var token =/*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://localhost:8080/api/v1/film?name=" + encodeURIComponent(filmName), true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var films = JSON.parse(xhr.responseText).data.Films;
+                    displayFilms(films);
+                } else {
+                    document.getElementById("filmList").style.display = "none";
+                    console.error("Failed to retrieve films by name");
+                }
+            }
+        };
+
+        xhr.send();
+        return false;
+    }
+    function toggleScheduleVisibility() {
+        var filmList = document.getElementById("scheduleList");
+        if (filmList.style.display === "none") {
+            retrieveAllSchedules();
+        } else {
+            hideSchedules();
+        }
+    }
+    function hideSchedules() {
+        document.getElementById("scheduleList").style.display = "none";
+    }
+    function retrieveAllSchedules() {
+        document.getElementById("scheduleList").style.display = "block";
+        var xhr = new XMLHttpRequest();
+        var token =/*[[${token}]]*/ '';
+        xhr.open("GET", "http://localhost:8080/api/v1/schedules", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var schedules = JSON.parse(xhr.responseText);
+
+                    displaySchedules(schedules);
+                } else {
+                    console.error("Failed to retrieve schedules");
+                }
+            }
+        };
+
+        xhr.send();
+        return false;
+    }
+
+    function displaySchedules(schedules) {
+        var scheduleDataDiv = document.getElementById("scheduleData");
+        scheduleDataDiv.innerHTML = ""; // Clear previous data
+
+        schedules.forEach(function(schedule) {
+            var scheduleCard = document.createElement("div");
+            scheduleCard.classList.add("col-sm-4", "mb-3");
+
+            var cardContent = `
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Schedule ID: ${schedule.id}</h5>
+                    <p class="card-text">Price: $${schedule.price}</p>
+                    <p class="card-text">Available Seats: ${schedule.availableSeats}</p>
+                    <p class="card-text">Show Date Time: ${schedule.showDateTime}</p>
+                </div>
+            </div>
+        `;
+
+            scheduleCard.innerHTML = cardContent;
+            scheduleDataDiv.appendChild(scheduleCard);
+        });
+
+        var scheduleListDiv = document.getElementById("scheduleList");
+        scheduleListDiv.style.display = "block"; // Show the schedule list
+    }
+
+    function submitRating() {
+        var type = document.getElementById("ratingFormm").dataset.type;
+        if (type === "film") {
+            console.log("rating filmmmm");
+            return rateFilm();
+        } else if (type === "producer") {
+            return rateProducer();
+        }
+        return false;
+    }
+
+    function rateFilm() {
+        console.log("rating film");
+        var id = document.getElementById("viewerIdd").value;
+        var token = /*[[${token}]]*/ '';
+        var rating = document.getElementById("ratingInput").value;
+        var filmId = document.getElementById("idInput").value;
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://localhost:8080/api/v1/viewer/rateFilm", true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        var requestBody = JSON.stringify({ "filmId": filmId, "rating": rating, "viewerId":id });
+        console.log(requestBody);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 201) {
+                    alert("rated film successfully");
+                    console.log("rated film successfully");
+                } else {
+                    console.error("Failed to rate film");
+                }
+            }
+        };
+
+        xhr.send(requestBody);
+        return false;
+    }
+
+    function rateProducer() {
+        console.log("rateProducer button clicked.");
+        var id = document.getElementById("viewerIdd").value;
+        var token = /*[[${token}]]*/ '';
+        var rating = document.getElementById("ratingInput").value;
+        var producerId = document.getElementById("idInput").value;
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://localhost:8080/api/v1/viewer/rateProducer ", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 201) {
+                    console.log("Viewer rated producer successfully");
+                    alert("Viewer rated producer successfully");
+                } else {
+                    console.error("Failed rate producer by viewer");
+                }
+            }
+        };
+        var requestBody = JSON.stringify({ "producerId": producerId, "rating": rating, "viewerId":id });
+        xhr.send(requestBody);
+        return false;
+    }
+
+
+    function reserveSeat(event) {
+        event.preventDefault(); // Prevent default form submission behavior
+
+        var scheduleId = document.getElementById("scheduleIdInput").value;
+        var token =/*[[${token}]]*/ '';
+        var id = document.getElementById("ViewerInput").value;
+        var requestBody = JSON.stringify({ "schdule_id": scheduleId, "viewer_id":id });
+        console.log(requestBody);
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://localhost:8080/api/v1/viewer/schedule", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 201) {
+                    alert("Seat reserved successfully");
+                    console.log("Seat reserved successfully");
+                } else {
+                    console.error("Failed to reserve seat");
+                }
+            }
+        };
+        xhr.send(requestBody);
+        return false;
+    }
+
+    function getUserById() {
+        event.preventDefault();
+        var token =/*[[${token}]]*/ '';
+        var userId = document.getElementById("user").value;
+        var userType = document.querySelector('input[name="userType"]:checked').value;
+        var xhr = new XMLHttpRequest();
+
+
+        var url = ("/api/v1/" + userType + "?id=" + userId).trim();
+        console.log(url);
+        xhr.open("GET", url);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    console.log("hii");
+                    displayUserData(xhr.responseText);
+                } else {
+                    document.getElementById("userDataa").innerHTML = "";
+                    alert("Failed to fetch user data.");
+                }
+            }
+        };
+
+        xhr.send();
+    }
+    function displayUserData(responseText) {
+        var userDataDiv = document.getElementById("userData");
+        var userData = JSON.parse(responseText);
+
+        var userDataHtml = '<div class="card-body">';
+        for (var key in userData.data.User) {
+            userDataHtml += '<p><strong>' + key + ':</strong> ' + userData.data.User[key] + '</p>';
+        }
+        userDataHtml += '</div>';
+
+        userDataDiv.innerHTML = userDataHtml;
+    }
+
+    function displayUsersData(responseText) {
+        var userDataDiv = document.getElementById("userData");
+        var userData = JSON.parse(responseText);
+
+        var userDataHtml = '<div class="card">';
+        for (var key in userData.data) {
+            userDataHtml += '<div class="card-header">' + key + '</div>';
+            userDataHtml += '<div class="card-body">';
+            userData.data[key].forEach(function(user, index) {
+                userDataHtml += '<p><strong>Id:</strong> ' + user.id + '</p>';
+                userDataHtml += '<p><strong>Username:</strong> ' + user.username + '</p>';
+                userDataHtml += '<p><strong>Email:</strong> ' + user.email + '</p>';
+                // Add separator after each user except the last one
+                if (index < userData.data[key].length - 1) {
+                    userDataHtml += '<hr>';
+                }
+            });
+            userDataHtml += '</div>';
+        }
+        userDataHtml += '</div>';
+
+        userDataDiv.innerHTML = userDataHtml;
+    }
+
+    function getAllUsers(userType) {
+        var form = document.getElementById("userData");
+        if(form.style.display == "none"){
+            form.style.display = "block"
+        var token =/*[[${token}]]*/ '';
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/api/v1/" + userType);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    displayUsersData(xhr.responseText);
+                } else {
+                    alert("Failed to fetch user data.");
+                }
+            }
+        };
+
+        xhr.send();
+        } else {
+            form.style.display = "none"
+        }
+    }
+
+</script>
+</body>
+</html>

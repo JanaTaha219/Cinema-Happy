@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producer Page</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Producer Dashboard</a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="btn-group mr-auto">
+            <button type="button" class="btn btn-light" onclick="showUpdateForm()">Update Producer Account</button>
+            <button type="button" class="btn btn-light" onclick="showDeleteConfirmation()">Delete Producer Account</button>
+            <button type="button" class="btn btn-light" onclick="logout()">Log out</button>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="container mt-4">
+    <div id="updateForm" style="display: none;">
+        <form id="updateProducerForm" onsubmit="submitUpdateForm(event)">
+            <div class="form-group">
+                <label for="username">User name:</label>
+                <input type="text" class="form-control" id="username" name="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" id="password" name="password">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" name="email">
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+    <div id="deleteConfirmation" style="display: none;">
+        <form id="deleteConfirmationForm">
+            <p>Are you sure you want to delete your account?</p>
+            <button type="button" class="btn btn-danger" onclick="confirmDelete()">Yes</button>
+            <button type="button" class="btn btn-secondary" onclick="cancelDelete()">No</button>
+        </form>
+    </div>
+    <h2>Hello producer <span th:text="${username}"></span></h2>
+        <div class="row mt-4">
+            <div class="col">
+                <button class="btn btn-primary mr-2" onclick="toggleAddFilmForm()">Add Film</button>
+                <button class="btn btn-primary mr-2" onclick="toggleUpdateFilmForm()">Update Film</button>
+                <button class="btn btn-danger" onclick="toggleDeleteFilmForm()">Delete Film</button>
+                <button class="btn btn-success" onclick="toggleFilmVisibility()">Retrieve All Films</button>
+                <button class="btn btn-info mr-2" onclick="retrieveFilmsByNameForm()">Retrieve Films by Name</button>
+                <button class="btn btn-info mr-2" onclick="retrieveFilmsByProducerNameForm()">Retrieve Films by Producer's Name</button>
+                <button class="btn btn-info mr-2" onclick="retrieveFilmsByProducerIdForm()">Retrieve Films by Producer's ID</button>
+            </div>
+        </div>
+    <div id="addFilmForm" style="display: none;">
+        <form id="filmFormAdd" th:action="@{/api/v1/producer/film}" method="post" onsubmit="return addFilm()">
+            <div class="form-group">
+                <label for="producerId">Producer ID:</label>
+                <input type="text" class="form-control" id="producerId" name="producerId" th:value="${id}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="filmName">Film Name:</label>
+                <input type="text" class="form-control" id="filmName" name="name">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+
+<div id="updateFilmForm" style="display: none;">
+    <form id="filmFormUpdate" action="#" method="patch" onsubmit="return updateFilm()">
+        <div class="form-group">
+            <label for="filmId">Film ID:</label>
+            <input type="text" class="form-control" id="filmId" name="filmId">
+        </div>
+        <div class="form-group">
+            <label for="newFilmName">New Film Name:</label>
+            <input type="text" class="form-control" id="newFilmName" name="newFilmName">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+<div id="deleteFilmForm" style="display: none;">
+    <form id="filmFormDelete" onsubmit="return deleteFilm()">
+        <div class="form-group">
+            <label for="deleteFilmId">Enter Film ID to Delete:</label>
+            <input type="text" class="form-control" id="deleteFilmId" name="deleteFilmId">
+        </div>
+        <button type="submit" class="btn btn-danger">Confirm Delete</button>
+    </form>
+
+</div>
+    <div id="retrieveByNameForm" style="display: none;">
+    <form id="retrieveFilmForm" onsubmit="retrieveFilmsByName(event)">
+        <div class="form-group">
+            <label for="filmNamee">Enter Film Name:</label>
+            <input type="text" class="form-control" id="filmNamee" name="filmNamee">
+        </div>
+        <button type="submit" class="btn btn-primary">Retrieve</button>
+    </form>
+</div>
+    <div id="retrieveByProducerNameForm" style="display: none;">
+        <form id="retrieveFilmByProducerNameForm" onsubmit="retrieveFilmsByProducerName(event)">
+            <div class="form-group">
+                <label for="producerName">Enter Producer's Name:</label>
+                <input type="text" class="form-control" id="producerName" name="producerName">
+            </div>
+            <button type="submit" class="btn btn-primary">Retrieve</button>
+        </form>
+    </div>
+
+    <div id="retrieveByProducerIdForm" style="display: none;">
+        <form id="retrieveFilmByProducerIdForm" onsubmit="retrieveFilmsByProducerId(event)">
+            <div class="form-group">
+                <label for="producerIdd">Enter Producer's ID:</label>
+                <input type="number" class="form-control" id="producerIdd" name="producerIdd">
+            </div>
+            <button type="submit" class="btn btn-primary">Retrieve</button>
+        </form>
+    </div>
+    <div id="filmList" style="display: none;">
+        <h2>All Films</h2>
+        <div id="filmData"></div>
+    </div>
+<script th:inline="javascript">
+    var token = /*[[${token}]]*/ 'defaultToken';
+
+    function showUpdateForm(){
+        var form = document.getElementById("updateForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+    function toggleAddFilmForm() {
+        var form = document.getElementById("addFilmForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    function toggleDeleteFilmForm() {
+        var form = document.getElementById("deleteFilmForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    function toggleUpdateFilmForm() {
+        var form = document.getElementById("updateFilmForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    function addFilm() {
+        toggleAddFilmForm();
+        var producerId = document.getElementById("producerId").value;
+        var filmName = document.getElementById("filmName").value;
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/v1/producer/film", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 201) {
+                alert("Film added successfully!");
+                console.log("hi",xhr.responseText);
+            } else {
+                console.error("hello",xhr.responseText);
+            }
+        };
+        console.log("token", token);
+        console.log(producerId, filmName);
+        var requestBody = JSON.stringify({ "producerId": producerId, "name": filmName });
+        xhr.send(requestBody);
+
+        console.log("Add Film button clicked.");
+        return false;
+    }
+
+    function updateFilm() {
+        toggleUpdateFilmForm();
+        var filmId = document.getElementById("filmId").value;
+        var newFilmName = document.getElementById("newFilmName").value;
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("PATCH", "/api/v1/producer/film/" + filmId, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("Film updated successfully!");
+                    console.log("Film updated successfully");
+                } else {
+                    console.error("Failed to update film");
+                }
+            }
+        };
+
+        var requestBody = {
+            "name": newFilmName
+        };
+
+        xhr.send(JSON.stringify(requestBody));
+        console.log("Update Film button clicked.");
+        return false;
+    }
+
+    function deleteFilm() {
+        toggleDeleteFilmForm();
+        var filmId = document.getElementById("deleteFilmId").value;
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("DELETE", "/api/v1/producer/film/" + filmId, true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("Film deleted successfully!");
+                    console.log("Film deleted successfully");
+                } else {
+                    console.error("Failed to delete film");
+                }
+            }
+        };
+
+        xhr.send();
+        console.log("Delete Film button clicked.");
+        return false;
+    }
+
+    function submitUpdateForm(event) {
+        event.preventDefault(); // Prevent the form from submitting normally
+
+        var id = /*[[${id}]]*/ '';
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var email = document.getElementById("email").value;
+        var token = /*[[${token}]]*/ ''; // Replace with actual token
+
+        var requestBody = {};
+
+        if (username) {
+            requestBody.username = username;
+        }
+        if (password) {
+            requestBody.password = password;
+        }
+        if (email) {
+            requestBody.email = email;
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("PATCH", "/api/v1/producer/" + id, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("Producer account updated successfully!");
+                    console.log("Producer account updated successfully");
+                } else {
+                    console.error("Failed to update producer account");
+                }
+            }
+        };
+        xhr.send(JSON.stringify(requestBody));
+        return false;
+    }
+    function showDeleteConfirmation() {
+        var form = document.getElementById("deleteConfirmation");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+    function cancelDelete() {
+        document.getElementById("deleteConfirmation").style.display = "none";
+    }
+
+    function confirmDelete() {
+        var id = /*[[${id}]]*/ '';
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("DELETE", "/api/v1/producer/" + id, true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    // Request successful
+                    console.log("Producer account deleted successfully");
+                    window.location.href = "authenticate.html"; // Redirect to authenticate.html
+                } else {
+                    // Request failed
+                    console.error("Failed to delete producer account");
+                }
+            }
+        };
+        xhr.send();
+        return false;
+    }
+
+    function toggleFilmVisibility() {
+        var filmList = document.getElementById("filmList");
+        if (filmList.style.display === "none") {
+            retrieveAllFilms();
+        } else {
+            hideFilms();
+        }
+    }
+
+
+    function retrieveAllFilms() {
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/api/v1/film", true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var films = JSON.parse(xhr.responseText).data.Films;
+                    displayFilms(films);
+                } else {
+                    document.getElementById("filmList").style.display = "none";
+                    console.error("Failed to retrieve films");
+                }
+            }
+        };
+
+        xhr.send();
+        return false;
+    }
+    function logout() {
+        var id = /*[[${id}]]*/ '';
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/out", true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("logged out successfully");
+                    console.log("logged out successfully");
+                    window.location.href = "authenticate.html"; // Redirect to authenticate.html
+                } else {
+                    // Request failed
+                    console.error("Failed to logout");
+                }
+            }
+        };
+        xhr.send();
+        window.location.href = "login";
+        return false;
+    }
+
+    function displayFilms(films) {
+        var filmData = document.getElementById("filmData");
+        filmData.innerHTML = "";
+
+        films.forEach(function(film) {
+            var filmDiv = document.createElement("div");
+            filmDiv.classList.add("col-md-4"); // Bootstrap class for medium devices (desktops)
+
+            var card = document.createElement("div");
+            card.classList.add("card", "mb-4", "shadow-sm");
+
+            var cardBody = document.createElement("div");
+            cardBody.classList.add("card-body");
+
+            var name = document.createElement("h5");
+            name.classList.add("card-title");
+            name.textContent = film.name;
+
+            var producerId = document.createElement("p");
+            producerId.classList.add("card-text");
+            producerId.textContent = "Producer ID: " + film.producerId;
+
+            var totalRating = document.createElement("p");
+            totalRating.classList.add("card-text");
+            totalRating.textContent = "Total Rating: " + film.totalRating;
+
+            cardBody.appendChild(name);
+            cardBody.appendChild(producerId);
+            cardBody.appendChild(totalRating);
+
+            card.appendChild(cardBody);
+            filmDiv.appendChild(card);
+            filmData.appendChild(filmDiv);
+        });
+
+        document.getElementById("filmList").style.display = "block";
+    }
+    function hideFilms() {
+        document.getElementById("filmList").style.display = "none";
+    }
+    function retrieveFilmsByNameForm() {
+        var form = document.getElementById("retrieveByNameForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+        if(form.style.display === "none")
+            document.getElementById("filmList").style.display = "none";
+    }
+
+    function retrieveFilmsByName(event) {
+        event.preventDefault(); // Prevent the form from submitting normally
+
+        var filmName = document.getElementById("filmNamee").value;
+        var token =/*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://localhost:8080/api/v1/film?name=" + encodeURIComponent(filmName), true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var films = JSON.parse(xhr.responseText).data.Films;
+                    displayFilms(films);
+                } else {
+                    document.getElementById("filmList").style.display = "none";
+                    console.error("Failed to retrieve films by name");
+                }
+            }
+        };
+
+        xhr.send();
+        return false;
+    }
+    function retrieveFilmsByProducerNameForm() {
+        var form = document.getElementById("retrieveByProducerNameForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+        if(form.style.display === "none")
+            document.getElementById("filmList").style.display = "none";
+    }
+
+    function retrieveFilmsByProducerIdForm() {
+        var form = document.getElementById("retrieveByProducerIdForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+        if(form.style.display === "none")
+            document.getElementById("filmList").style.display = "none";
+    }
+
+    function retrieveFilmsByProducerName(event) {
+        event.preventDefault(); // Prevent the form from submitting normally
+
+        var producerName = document.getElementById("producerName").value;
+        var token =/*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://localhost:8080/api/v1/film?producerName=" + encodeURIComponent(producerName), true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var films = JSON.parse(xhr.responseText).data.Films;
+                    displayFilms(films);
+                } else {
+                    document.getElementById("filmList").style.display = "none";
+                    console.error("Failed to retrieve films by producer's name");
+                }
+            }
+        };
+
+        xhr.send();
+        return false;
+    }
+
+    function retrieveFilmsByProducerId(event) {
+        event.preventDefault(); // Prevent the form from submitting normally
+
+        var producerId = document.getElementById("producerIdd").value;
+        var token = /*[[${token}]]*/ '';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://localhost:8080/api/v1/film?producerId=" + producerId, true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var films = JSON.parse(xhr.responseText).data.Films;
+                    displayFilms(films);
+                } else {
+                    document.getElementById("filmList").style.display = "none";
+                    console.error("Failed to retrieve films by producer's ID");
+                }
+            }
+        };
+
+        xhr.send();
+        return false;
+    }
+
+</script>
+</div>
+</body>
+</html>
